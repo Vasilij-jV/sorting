@@ -2,41 +2,39 @@
 import json
 
 
+# Функция для семантического сравнения строк
+def are_strings_semantically_equal(str1, obj_with_employees):
+    counter = False
+    for key, value in obj_with_employees['employees'][0].items():
+        if str1.casefold() == key.casefold():
+            return key, value
+        else:
+            counter = True
+    if counter:
+        raise ValueError('Bad key for sorting')
+
+
 def employees_rewrite(sort_type):
     with open('employees.json', 'r') as json_employees_in_func:
         obj_employees_in_func = json.load(json_employees_in_func)
 
-    obj_employees_in_func_sorted = {}
+    obj_employees_in_func_sorted = 0
 
     try:
-        # Привожу ключ (тип сортировки) к нижнему регистру
-        sort_type = sort_type.lower()
-        # Создаю новый словарь из нулевого элемента исходного списка employees для преобразования ключей в нижний
-        # регистр и сравнение их с ключом - образцом
-        zero_element = {key.lower(): value for key, value in obj_employees_in_func['employees'][0].items()}
-        # Проверяю, есть ли свойство в словаре, являющимся элементом списка и равно ли его значение строке
-        if isinstance(zero_element[sort_type], str) and sort_type in zero_element:
-            # Возвращаю названию ключа прежний формат
-            for key, value in obj_employees_in_func['employees'][0].items():
-                if value == zero_element[sort_type]:
-                    sort_type = key
-                    break
-            # Сортирую
+        good_key = are_strings_semantically_equal(sort_type, obj_employees_in_func)
+        # Два блока сортировки
+        if isinstance(good_key[1], str):
             obj_employees_in_func_sorted = {
-                'employees': sorted(obj_employees_in_func['employees'], key=lambda x: x[sort_type])}
-        # В этом блоке такие же действия, как и в предыдущем, но значение не строка, а число
-        elif isinstance(zero_element[sort_type], int) and sort_type in zero_element:
-            for key, value in obj_employees_in_func['employees'][0].items():
-                if value == zero_element[sort_type]:
-                    sort_type = key
-                    break
+                'employees': sorted(obj_employees_in_func['employees'], key=lambda x: x[good_key[0]])}
+        elif isinstance(good_key[1], int):
             obj_employees_in_func_sorted = {
                 'employees': sorted(obj_employees_in_func['employees'], key=lambda x: x[sort_type], reverse=True)}
         # Записываю отсортированный список в файл
-        with open(f'employees_{sort_type.lower()}_sorted.json', mode='w', encoding='utf-8') as employees_sorted_write:
+        with open(f'employees_{sort_type.lower()}_sorted.json', mode='w',
+                  encoding='utf-8') as employees_sorted_write:
             json.dump(obj_employees_in_func_sorted, employees_sorted_write, indent=4)
-    except KeyError as e:
-        print('Bad key for sorting', e)
+    except ValueError as ver:
+        print(f'Error. {ver}')
 
 
-employees_rewrite('department')
+employees_rewrite('salary')
