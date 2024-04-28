@@ -4,14 +4,10 @@ import json
 
 # Функция для семантического сравнения строк
 def are_strings_semantically_equal(str1, obj_with_employees):
-    counter = False
     for key, value in obj_with_employees['employees'][0].items():
         if str1.casefold() == key.casefold():
             return key, value
-        else:
-            counter = True
-    if counter:
-        raise ValueError('Bad key for sorting')
+    raise ValueError('Bad key for sorting')
 
 
 def employees_rewrite(sort_type):
